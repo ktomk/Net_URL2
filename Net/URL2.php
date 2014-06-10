@@ -244,6 +244,63 @@ class Net_URL2
     private $_fragment = false;
 
     /**
+     * Retrieve URI from document
+     *
+     * @param DOMNode|SimpleXMLElement $node document element to get URI from
+     *
+     * @return Net_URL2
+     * @throws InvalidArgumentException If the DOMNode does not have an ownerDocument
+     */
+    public static function documentUri($node)
+    {
+        if ($node instanceof SimpleXMLElement) {
+            $node = dom_import_simplexml($node);
+        }
+
+        if ($node instanceof DOMNode && $node->ownerDocument) {
+            $node = $node->ownerDocument;
+        }
+
+        if ($node instanceof DOMDocument) {
+            return new Net_URL2($node->documentURI);
+        }
+
+        throw new InvalidArgumentException(
+            sprintf('DOMNode or SimpleXMLElement expected, %s given', gettype($node))
+        );
+    }
+
+    /**
+     * Create "file" scheme URI of a file
+     *
+     * @param string|SplFileInfo $file file
+     *
+     * @return Net_URL2
+     * @throws InvalidArgumentException
+     */
+    public static function fileUri($file)
+    {
+        if ($file instanceof SplFileInfo) {
+            $file = $file->getPathname();
+        }
+
+        if (is_object($file) && method_exists($file, '__toString')) {
+            $file = (string) $file;
+        }
+
+        if (is_string($file)) {
+            if (strtolower(parse_url($file, PHP_URL_SCHEME)) !== 'file') {
+                $file = 'file:///' . strtr($file, '\\', '/');
+            }
+            return new Net_URL2($file);
+        }
+
+        throw new InvalidArgumentException(
+            sprintf('String or SplFileInfo expected, %s given', gettype($file))
+        );
+    }
+
+    /**
      * Constructor.
      *
      * @param string $url     an absolute or relative URL
