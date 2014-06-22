@@ -84,6 +84,119 @@ class Net_URL2
      */
     const OPTION_SEPARATOR_OUTPUT = 'output_separator';
 
+
+    // following is a list of fake properties that are unset again
+    // inside the constructor. their definition is for documentation
+    // purposes deprecating access via magic methods that have
+    // been introduced long ago.
+
+    /**
+     * @see getAuthority
+     * @see setAuthority
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $authority;
+
+    /**
+     * @see getFragment
+     * @see setFragment
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $fragment;
+
+    /**
+     * @see getHost
+     * @see setHost
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $host;
+
+    /**
+     * @see getNormalizedURL
+     * @see __get
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $normalizedurl;
+
+    /**
+     * @see getPassword
+     * @see __get
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $password;
+
+    /**
+     * @see getPath
+     * @see setPath
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $path;
+
+    /**
+     * @see getPort
+     * @see setPort
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $port;
+
+    /**
+     * @see getQuery
+     * @see setQuery
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $query;
+
+    /**
+     * @see getQueryVariables
+     * @see setQueryVariables
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $queryvariables;
+
+    /**
+     * @see getScheme
+     * @see setScheme
+     * @see __get
+     * @see __set
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $scheme;
+
+    /**
+     * @see getURL
+     * @see __get
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $url;
+
+    /**
+     * @see getUser
+     * @see __get
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $user;
+
+    /**
+     * @see getUserinfo
+     * @see __get
+     * @deprecated this property was accessed via magic methods and is to be removed
+     */
+    public $userinfo;
+
     /**
      * Default options corresponds to how PHP handles $_GET.
      */
@@ -140,6 +253,27 @@ class Net_URL2
      */
     public function __construct($url, array $options = array())
     {
+        // deprecating properties accessed via magic methods.
+        //
+        // to document those as deprecated, they have been defined as public
+        // properties and then tagged @deprecated.
+        //
+        // this requires to unset them in ctor again so that __get and
+        // __set are still triggered
+        unset($this->authority);
+        unset($this->fragment);
+        unset($this->host);
+        unset($this->normalizedurl);
+        unset($this->password);
+        unset($this->path);
+        unset($this->port);
+        unset($this->query);
+        unset($this->queryvariables);
+        unset($this->scheme);
+        unset($this->url);
+        unset($this->user);
+        unset($this->userinfo);
+
         foreach ($options as $optionName => $value) {
             if (array_key_exists($optionName, $this->_options)) {
                 $this->_options[$optionName] = $value;
@@ -162,6 +296,8 @@ class Net_URL2
      */
     public function __set($var, $arg)
     {
+        $this->_deprecateFieldMagic($var, 'set');
+
         $method = 'set' . $var;
         if (method_exists($this, $method)) {
             $this->$method($arg);
@@ -182,12 +318,34 @@ class Net_URL2
      */
     public function __get($var)
     {
+        $this->_deprecateFieldMagic($var, 'get');
+
         $method = 'get' . $var;
         if (method_exists($this, $method)) {
             return $this->$method();
         }
 
         return false;
+    }
+
+    /**
+     * Helper method to give warnings about deprecated virtual (accessed by magic
+     * methods) properties.
+     *
+     * @param string $var         name of property
+     * @param string $alternative to use, e.g. 'get' or 'set'
+     *
+     * @return void
+     */
+    private function _deprecateFieldMagic($var, $alternative)
+    {
+        $type    = defined('E_USER_DEPRECATED') ? E_USER_DEPRECATED : E_USER_WARNING;
+        $message = sprintf(
+            'Accessing field Net_URL2::$%s via magic method is deprecated, use ' .
+            '%sters instead.', $var, $alternative
+        );
+
+        trigger_error($message, $type);
     }
 
     /**

@@ -724,15 +724,16 @@ class Net_URL2Test extends PHPUnit_Framework_TestCase
      */
     public function testMagicSetGet()
     {
-        $url = new Net_URL2('');
+        $url   = new Net_URL2('');
+        $value = 'value';
 
-        $property       = 'authority';
-        $url->$property = $value = 'value';
-        $this->assertEquals($value, $url->$property);
+        @$url->authority = $value;
+        $actual = @$url->authority;
+        $this->assertEquals($value, $actual);
 
-        $property       = 'unsetProperty';
-        $url->$property = $value;
-        $this->assertEquals(false, $url->$property);
+        @$url->unsetProperty = $value;
+        $actual = @$url->unsetProperty;
+        $this->assertEquals(false, $actual);
     }
 
     /**

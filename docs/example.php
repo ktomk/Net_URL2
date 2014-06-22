@@ -25,7 +25,7 @@ error_reporting(E_ALL | E_STRICT);
 require 'Net/URL2.php';
 
 $url = new Net_URL2(
-    'https://example.com/pls/portal30/PORTAL30.wwpob_page.changetabs?'
+    'https://user:pass@example.com/pls/portal30/PORTAL30.wwpob_page.changetabs?'
     .'p_back_url=http%3A%2F%2Fexample.com%2Fservlet%2Fpage%3F_pageid%3D360'
     .'%2C366%2C368%2C382%26_dad%3Dportal30%26_schema%3DPORTAL30&foo=bar'
 );
@@ -35,21 +35,33 @@ $url = new Net_URL2(
 <body>
 
 <pre>
-Protocol...: <?php echo $url->protocol; ?>
+Protocol...: <?php echo @$url->protocol; ?> (dead property)
 
-Username...: <?php echo $url->user; ?>
+Protocol...: <?php echo $url->getScheme(); ?>
 
-Password...: <?php echo $url->pass; ?>
+Username...: <?php echo $url->user; ?> (deprecated property)
 
-Server.....: <?php echo $url->host; ?>
+Username...: <?php echo $url->getUser(); ?>
 
-Port.......: <?php $url->port; ?>
+Password...: <?php echo $url->pass; ?> (dead property)
 
-File/path..: <?php $url->path; ?>
+Password...: <?php echo $url->getPassword(); ?>
 
-Querystring: <?php print_r($url->querystring); ?>
+Server.....: <?php echo $url->host; ?> (deprecated property)
 
-Anchor.....: <?php echo $url->anchor;?>
+Server.....: <?php echo $url->getHost(); ?>
+
+Port.......: <?php $url->port; ?> (deprecated property)
+
+Port.......: <?php $url->getPort(); ?>
+
+File/path..: <?php $url->path; ?> (deprecated property)
+
+Querystring: <?php print_r($url->querystring); ?> (dead property)
+
+Anchor.....: <?php echo $url->anchor; ?> (dead property)
+
+Anchor.....: <?php echo $url->getFragment(); ?>
 
 Full URL...: <?php echo $url->getUrl(); ?>
 
