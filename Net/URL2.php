@@ -244,29 +244,64 @@ class Net_URL2
     private $_fragment = false;
 
     /**
-     * Retrieve URI from document
+     * Create Net_URL2
      *
-     * @param DOMNode|SimpleXMLElement $node document element to get URI from
+     * Static ctor
+     *
+     *
+     */
+    public static function create($url, $options = array())
+    {
+        return new Net_URL2($url, $options);
+    }
+
+    /**
+     * Create Net_URL2 from a string value
+     *
+     * Traditionally any objects implementing __toString() were already supported by
+     * the ctor, however in context of other objects not having __toString alter-
+     * natives are applied to obtain a string value.
+     *
+     * @param mixed $string  string value of an absolute or relative URL
+     * @param array $options an array of OPTION_xxx constants
+     *
+     * @return Net_URL2
+     */
+    public static function createFromString($string, $options = array())
+    {
+        $string = self::_stringyFy($string);
+
+        return new Net_URL2($string, $options);
+    }
+
+    /**
+     * Create Net_URL2 from a document
+     *
+     * @param DOMNode|SimpleXMLElement $docOrMember document or document element to
+     *                                              get document URI from
+     * @param array                    $options     an array of OPTION_xxx constants
      *
      * @return Net_URL2
      * @throws InvalidArgumentException If the DOMNode does not have an ownerDocument
      */
-    public static function documentUri($node)
+    public static function createFromDocument($docOrMember, $options = array())
     {
-        if ($node instanceof SimpleXMLElement) {
-            $node = dom_import_simplexml($node);
+        $docOrMember = self::_singleFy($docOrMember);
+
+        if ($docOrMember instanceof SimpleXMLElement) {
+            $docOrMember = dom_import_simplexml($docOrMember);
         }
 
-        if ($node instanceof DOMNode && $node->ownerDocument) {
-            $node = $node->ownerDocument;
+        if ($docOrMember instanceof DOMNode && $docOrMember->ownerDocument) {
+            $docOrMember = $docOrMember->ownerDocument;
         }
 
-        if ($node instanceof DOMDocument) {
-            return new Net_URL2($node->documentURI);
+        if ($docOrMember instanceof DOMDocument) {
+            return new Net_URL2($docOrMember->documentURI, $options);
         }
 
-        throw new InvalidArgumentException(
-            sprintf('DOMNode or SimpleXMLElement expected, %s given', gettype($node))
+        throw new UnexpectedValueException(
+            sprintf('Unable to obtain documentURI from %s', gettype($docOrMember))
         );
     }
 
@@ -298,6 +333,45 @@ class Net_URL2
         throw new InvalidArgumentException(
             sprintf('String or SplFileInfo expected, %s given', gettype($file))
         );
+    }
+
+
+    /**
+     * Helper method ensuring a value is as stringy as possible
+     *
+     * @param mixed $subject anything we try to get into a string
+     *
+     * @return mixed|string|null
+     */
+    private static function _stringyFy($subject)
+    {
+        $subject = self::_singleFy($subject);
+
+        if ($subject instanceof DOMNode) {
+            return $subject->nodeValue;
+        }
+
+        return $subject;
+    }
+
+    /**
+     * Helper method ensuring a single value
+     *
+     * @param mixed $subject anything we try to get into a single value
+     *
+     * @return array|DOMNode|mixed
+     */
+    private static function _singleFy($subject)
+    {
+        if ($subject instanceof DOMNodeList) {
+            return $subject->item(0);
+        }
+
+        if (is_array($subject)) {
+            return reset($subject);
+        }
+
+        return $subject;
     }
 
     /**
