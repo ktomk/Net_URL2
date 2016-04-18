@@ -24,6 +24,17 @@
 class Net_URL2Test extends PHPUnit_Framework_TestCase
 {
     /**
+     * @link https://pear.php.net/bugs/bug.php?id=21013
+     */
+    public function test21013()
+    {
+        $base = new Net_URL2('http://example.com/a/b/..');
+        $this->assertEquals('http://example.com/a/b/c.php', (string) $base->resolve('c.php'));
+        $base->normalize();
+        $this->assertEquals('http://example.com/a/c.php', (string) $base->resolve('c.php'));
+    }
+
+    /**
      * Tests setting a zero-length string and false as authority
      * Also: Regression test for Bug #20420
      *
