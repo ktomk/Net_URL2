@@ -24,6 +24,38 @@
 class Net_URL2Test extends PHPUnit_Framework_TestCase
 {
     /**
+     *
+     */
+    public function testNormalization()
+    {
+        $url = new Net_URL2("%48ttp://example.com");
+        $url->normalize(); // case-insensitive scheme
+        $this->assertSame('http://example.com/', (string) $url);
+
+        $url = new Net_URL2("http://%45xample.com");
+        $url->normalize(); // case-insensitive host
+        $this->assertSame('http://example.com/', (string) $url);
+
+    }
+
+    /**
+     * When parsing an URL into it's components, it's not
+     */
+    public function testPortNormalization()
+    {
+        $url = new Net_Url2('http://github.com:%380/ktomk/Net_URL2.git');
+        $this->assertEquals('http://github.com:80/ktomk/Net_URL2.git', (string) $url);
+        $this->assertSame('80', $url->getPort());
+        $url->normalize();
+        $this->assertEquals('http://github.com/ktomk/Net_URL2.git', (string) $url);
+
+        $url = new Net_Url2('http://example.com:aaff/');
+        $this->assertSame(false, $url->getPort());
+        $this->assertSame('example.com:aaff', $url->getHost());
+
+    }
+
+    /**
      * @link https://pear.php.net/bugs/bug.php?id=21013
      */
     public function test21013()

@@ -385,6 +385,8 @@ class Net_URL2
             return $this;
         }
 
+        $authority = $this->_decodeUnreserved($authority);
+
         if (!preg_match('(^(([^@]*)@)?(.+?)(:(\d*))?$)', $authority, $matches)) {
             return $this;
         }
@@ -720,7 +722,7 @@ class Net_URL2
             $url .= '#' . $this->_fragment;
         }
 
-        return $url;
+        return $this->_decodeUnreserved($url);
     }
 
     /**
@@ -782,7 +784,7 @@ class Net_URL2
 
         // Scheme is case-insensitive
         if ($this->_scheme) {
-            $this->_scheme = strtolower($this->_scheme);
+            $this->_scheme = strtolower($this->_decodeUnreserved($this->_scheme));
         }
 
         // Hostname is case-insensitive
@@ -1182,6 +1184,42 @@ class Net_URL2
                            : false
             ;
         $this->_fragment = !empty($matches[8]) ? $matches[9] : false;
+    }
+
+    /**
+     * The only exception is for percent-encoded octets corresponding to characters in the unreserved set, which can be
+     * decoded at any time.
+     *
+     * @param string|false $buffer
+     * @return string
+     */
+    private function _decodeUnreserved($buffer)
+    {
+        if (false === $buffer) {
+            return $buffer;
+        }
+
+        // For consistency, percent-encoded octets in the ranges of ALPHA (%41-%5A and %61-%7A), DIGIT (%30-%39),
+        // hyphen (%2D), period (%2E), underscore (%5F), or tilde (%7E) should not be created by URI producers
+        // (see RFC 3986, section 2.3. Unreserved Characters)
+        return preg_replace_callback(
+            '((?:%(?:2[DE]|3[0-9]|4[1-9A-F]|5[0-9AF]|6[1-9A-F]|7[0-9AE]))+)i',
+            array($this, '_decodeCallback'), $buffer
+        );
+    }
+
+    /**
+     * callback for decoding percent-encoded data
+     *
+     * @param array $matches Matches
+     *
+     * @return string
+     * @see _decodeData
+     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
+     */
+    private function _decodeCallback(array $matches)
+    {
+        return rawurldecode($matches[0]);
     }
 
     /**
