@@ -1,0 +1,12 @@
+name: Composer diagnose
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        COMPOSER_DISABLE_XDEBUG_WARN: 1
+        XDEBUG_MODE: off
+      run: |
+        sudo cp ${{github.action_path}}/releases.pub ~/.composer/keys.tags.pub
+        sudo cp ${{github.action_path}}/snapshots.pub ~/.composer/keys.dev.pub
+        composer diagnose

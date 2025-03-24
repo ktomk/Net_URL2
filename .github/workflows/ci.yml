@@ -25,5 +25,7 @@ jobs:
           php-version: ${{ matrix.php-version }}
           ini-values: include_path=.:/usr/share/php:pear/usr/share/php
           tools: composer:2.2
+      - name: Composer diagnose
+        uses: ./.github/actions/composer-diagnose
       - name: Make
         run: make
