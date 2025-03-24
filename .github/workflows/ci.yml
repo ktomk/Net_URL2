@@ -27,5 +27,7 @@ jobs:
           tools: composer:2.2
       - name: Composer diagnose
         uses: ./.github/actions/composer-diagnose
+      - name: Composer lock
+        uses: ./.github/actions/composer-lock
       - name: Make
         run: make

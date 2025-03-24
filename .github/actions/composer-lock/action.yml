@@ -1,0 +1,14 @@
+name: Composer lock
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        COMPOSER_DISABLE_XDEBUG_WARN: 1
+        XDEBUG_MODE: off
+      run: |
+        touch composer.lock
+        composer --profile -vvv install || {
+          rm -f composer.lock
+          composer --profile -vvv install
+        }
