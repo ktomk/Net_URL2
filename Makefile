@@ -1,8 +1,9 @@
 PHP ?= php
 export PHP_PEAR_PHP_BIN ?= $(PHP)
 export PHP_BINARY ?= $(PHP)
-export COMPOSER_NO_INTERACTION ?= 1
 COMPOSERCMD ?= $(PHP) "$(shell command -v composer)" -q
+export COMPOSER_DISABLE_XDEBUG_WARN ?= 1
+export COMPOSER_NO_INTERACTION ?= 1
 
 all:
 .PHONY: all clean build dist distclean
